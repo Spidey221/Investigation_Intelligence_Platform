@@ -18,3 +18,6 @@ export const deleteEvidence = (evidenceId) => api.delete(`/evidence/${evidenceId
 export const getEntitiesByCase = (caseId) => api.get(`/cases/${caseId}/entities`);
 export const getRelationshipsByCase = (caseId) => api.get(`/cases/${caseId}/relationships`);
 export const getInvestigationGraph = (caseId) => api.get(`/cases/${caseId}/graph`);
+
+export const togglePublicAccess = (caseId) => api.put(`/cases/${caseId}/public`);
+export const generateReport = (caseId, graphImage) => api.post(`/cases/${caseId}/report`, { graphImage }, { responseType: 'blob' });

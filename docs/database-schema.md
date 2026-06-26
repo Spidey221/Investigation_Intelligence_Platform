@@ -6,10 +6,14 @@ The database uses PostgreSQL.
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
 | `id` | SERIAL | PRIMARY KEY | Unique case identifier |
-| `title` | VARCHAR(255) | NOT NULL | Title of the investigation |
-| `description` | TEXT | NOT NULL | Summary of the case |
-| `status` | VARCHAR(50) | DEFAULT 'Active' | Case status (Active, Closed, Archived) |
-| `created_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Date case was created |
+| `title` | VARCHAR(255) | NOT NULL | Name of the investigation |
+| `description` | TEXT | NULL | Brief background of the case |
+| `status` | VARCHAR(50) | DEFAULT 'Open' | e.g. Open, Closed, Archival |
+| `is_public` | BOOLEAN | DEFAULT false | Flags if the case can be shared externally |
+| `share_token` | UUID | UNIQUE | Public routing token for shared viewing |
+| `share_created_at` | TIMESTAMP | NULL | Date the case was made public |
+| `created_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Date created |
+| `updated_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Date updated |
 
 ## `evidence` Table
 | Column | Type | Constraints | Description |

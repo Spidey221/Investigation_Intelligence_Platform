@@ -1,4 +1,6 @@
 const db = require('../db');
+const { v4: uuidv4 } = require('uuid');
+const { generateInvestigationReport } = require('../services/reportService');
 
 /**
  * Retrieve all cases ordered by creation date descending.
@@ -99,14 +101,61 @@ const updateCase = async (req, res) => {
 const deleteCase = async (req, res) => {
   try {
     const { id } = req.params;
-    const { rowCount } = await db.query('DELETE FROM cases WHERE id = $1', [id]);
-    if (rowCount === 0) {
-      return res.status(404).json({ error: 'Case not found' });
-    }
+    const query = 'DELETE FROM cases WHERE id = $1 RETURNING *';
+    const { rows } = await db.query(query, [id]);
+    if (rows.length === 0) return res.status(404).json({ error: 'Case not found' });
     res.json({ message: 'Case deleted successfully' });
   } catch (err) {
-    console.error('Error deleting case:', err);
     res.status(500).json({ error: 'Failed to delete case' });
+  }
+};
+
+/**
+ * Toggles public access and provisions a share_token if none exists.
+ */
+const togglePublicAccess = async (req, res) => {
+  try {
+    const { id } = req.params;
+    // Get current state
+    const { rows: currentRows } = await db.query('SELECT is_public, share_token FROM cases WHERE id = $1', [id]);
+    if (currentRows.length === 0) return res.status(404).json({ error: 'Case not found' });
+    
+    let { is_public, share_token } = currentRows[0];
+    is_public = !is_public; // Toggle
+
+    if (is_public && !share_token) {
+      share_token = uuidv4();
+    }
+
+    const query = `
+      UPDATE cases 
+      SET is_public = $1, share_token = $2, share_created_at = CURRENT_TIMESTAMP
+      WHERE id = $3 RETURNING *
+    `;
+    const { rows } = await db.query(query, [is_public, share_token, id]);
+    res.json(rows[0]);
+  } catch (err) {
+    console.error('Error toggling public access:', err);
+    res.status(500).json({ error: 'Failed to toggle public access' });
+  }
+};
+
+/**
+ * Generates a PDF report for the case.
+ */
+const generateReport = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { graphImage } = req.body;
+    
+    const pdfBuffer = await generateInvestigationReport(id, graphImage);
+    
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=Investigation_Report_Case_${id}.pdf`);
+    res.send(pdfBuffer);
+  } catch (err) {
+    console.error('Error generating report:', err);
+    res.status(500).json({ error: 'Failed to generate report' });
   }
 };
 
@@ -115,5 +164,7 @@ module.exports = {
   getCaseById,
   createCase,
   updateCase,
-  deleteCase
+  deleteCase,
+  togglePublicAccess,
+  generateReport
 };

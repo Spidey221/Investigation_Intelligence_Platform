@@ -14,11 +14,13 @@ const casesRoutes = require('./src/routes/cases');
 const evidenceRoutes = require('./src/routes/evidence');
 const entitiesRoutes = require('./src/routes/entities');
 const relationshipsRoutes = require('./src/routes/relationships');
+const sharedRoutes = require('./src/routes/shared');
 
 app.use('/api/cases', casesRoutes);
 app.use('/api/evidence', evidenceRoutes);
 app.use('/api', entitiesRoutes);
 app.use('/api', relationshipsRoutes);
+app.use('/api/shared/cases', sharedRoutes);
 
 // Static files
 const path = require('path');

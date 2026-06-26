@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard';
 import CaseDetails from './pages/CaseDetails';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import SharedCaseView from './pages/SharedCaseView';
 import { Toaster } from 'react-hot-toast';
 
 function App() {
@@ -13,6 +14,7 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/shared/:shareToken" element={<SharedCaseView />} />
         
         <Route element={<DashboardLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />

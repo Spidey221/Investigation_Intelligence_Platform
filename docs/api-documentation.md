@@ -77,3 +77,22 @@ Retrieves a table-ready list of all relationships formed in the case.
 ### `GET /cases/:id/graph`
 Retrieves intelligence relationships formatted exclusively for graph visualization.
 Returns `{ nodes: [...], edges: [...], statistics: {...} }`
+
+---
+
+## Report Generation & Sharing
+
+### `PUT /cases/:id/public`
+Toggles the public visibility of a case and provisions a `share_token`.
+
+### `POST /cases/:id/report`
+Generates a PDF Investigation Report. Accepts a base64 `{ graphImage }` payload to embed the visual intelligence graph into the document. Returns a PDF blob.
+
+### `GET /shared/cases/:shareToken`
+Retrieves case metadata for a shared case (requires `is_public` = true).
+
+### `GET /shared/cases/:shareToken/evidence`
+### `GET /shared/cases/:shareToken/entities`
+### `GET /shared/cases/:shareToken/relationships`
+### `GET /shared/cases/:shareToken/graph`
+Read-only endpoints specifically for populating the external Shared Dashboard without exposing actual case IDs.

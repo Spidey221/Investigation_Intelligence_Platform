@@ -1,15 +1,14 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, FolderOpen, Calendar, AlignLeft, Search, Filter, Network, GitGraph, Database, Activity, Share2, Download, Copy } from 'lucide-react';
-import { getCaseById, getEvidence, addEvidence, deleteEvidence, getEntitiesByCase, getRelationshipsByCase, getInvestigationGraph, togglePublicAccess, generateReport } from '../api/cases';
-import { AddEvidenceModal, EvidenceCard } from '../components/evidence';
+import { FolderOpen, Calendar, AlignLeft, Search, Filter, Network, GitGraph, Database, Activity, ShieldAlert } from 'lucide-react';
+import { getSharedCase, getSharedEvidence, getSharedEntities, getSharedRelationships, getSharedGraph } from '../api/shared';
+import { EvidenceCard } from '../components/evidence';
 import { EntityGroup } from '../components/entities';
 import InvestigationGraph from '../components/graph/InvestigationGraph';
 import { toast } from 'react-hot-toast';
-import html2canvas from 'html2canvas';
 
-const CaseDetails = () => {
-  const { id } = useParams();
+const SharedCaseView = () => {
+  const { shareToken } = useParams();
   const navigate = useNavigate();
   
   const [activeTab, setActiveTab] = useState('EVIDENCE');
@@ -20,7 +19,7 @@ const CaseDetails = () => {
   const [relationships, setRelationships] = useState([]);
   const [graphData, setGraphData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [error, setError] = useState(null);
   
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState('ALL');
@@ -29,120 +28,31 @@ const CaseDetails = () => {
   const [relFilterType, setRelFilterType] = useState('ALL');
 
   useEffect(() => {
-    fetchData();
-  }, [id]);
-
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      const [caseRes, evidenceRes, entitiesRes, relRes, graphRes] = await Promise.all([
-        getCaseById(id),
-        getEvidence(id),
-        getEntitiesByCase(id),
-        getRelationshipsByCase(id),
-        getInvestigationGraph(id)
-      ]);
-      setCaseDetails(caseRes.data);
-      setEvidenceList(evidenceRes.data);
-      setEntities(entitiesRes.data);
-      setRelationships(relRes.data);
-      setGraphData(graphRes.data);
-    } catch (err) {
-      console.error(err);
-      toast.error('Failed to load case intelligence.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleAddEvidence = async (formData) => {
-    try {
-      const res = await addEvidence(id, formData);
-      setEvidenceList([res.data, ...evidenceList]);
-      toast.success('Evidence secured successfully.');
-      setIsModalOpen(false);
-      
-      // Re-fetch everything to ensure relationships and graph are updated
-      await fetchData();
-    } catch (err) {
-      console.error(err);
-      toast.error(err.response?.data?.error || 'Failed to add evidence.');
-      throw err;
-    }
-  };
-
-  const handleDeleteEvidence = async (evidenceId) => {
-    if (window.confirm('Are you sure you want to permanently delete this evidence?')) {
+    const fetchData = async () => {
       try {
-        await deleteEvidence(evidenceId);
-        await fetchData(); // Refresh all state
-        toast.success('Evidence deleted.');
+        setLoading(true);
+        const [caseRes, evidenceRes, entitiesRes, relRes, graphRes] = await Promise.all([
+          getSharedCase(shareToken),
+          getSharedEvidence(shareToken),
+          getSharedEntities(shareToken),
+          getSharedRelationships(shareToken),
+          getSharedGraph(shareToken)
+        ]);
+        setCaseDetails(caseRes.data);
+        setEvidenceList(evidenceRes.data);
+        setEntities(entitiesRes.data);
+        setRelationships(relRes.data);
+        setGraphData(graphRes.data);
       } catch (err) {
         console.error(err);
-        toast.error('Failed to delete evidence.');
+        setError('Investigation is either private or does not exist.');
+        toast.error('Access Denied.');
+      } finally {
+        setLoading(false);
       }
-    }
-  };
-
-  const handleTogglePublic = async () => {
-    try {
-      toast.loading('Updating access controls...', { id: 'access' });
-      const res = await togglePublicAccess(id);
-      setCaseDetails(prev => ({ ...prev, is_public: res.data.is_public, share_token: res.data.share_token }));
-      toast.success(res.data.is_public ? 'Case is now Public.' : 'Case is now Private.', { id: 'access' });
-    } catch(err) {
-      toast.error('Failed to modify access.', { id: 'access' });
-    }
-  };
-
-  const handleCopyLink = () => {
-    if (!caseDetails?.share_token) return;
-    const link = `${window.location.origin}/shared/${caseDetails.share_token}`;
-    navigator.clipboard.writeText(link);
-    toast.success('Share link copied to clipboard!');
-  };
-
-  const handleGenerateReport = async () => {
-    try {
-      toast.loading('Preparing report generation...', { id: 'report' });
-      let graphImage = null;
-      
-      // Force switch to graph tab to capture it if not already there
-      const wasGraphOpen = activeTab === 'GRAPH';
-      if (!wasGraphOpen) {
-        setActiveTab('GRAPH');
-        // Wait briefly for render
-        await new Promise(res => setTimeout(res, 500));
-      }
-
-      const flowElement = document.querySelector('.react-flow');
-      if (flowElement) {
-        toast.loading('Capturing Intelligence Graph...', { id: 'report' });
-        const canvas = await html2canvas(flowElement, { useCORS: true, backgroundColor: '#0f172a' });
-        graphImage = canvas.toDataURL('image/png');
-      }
-
-      if (!wasGraphOpen) {
-        setActiveTab(activeTab); // Switch back
-      }
-
-      toast.loading('Building PDF Document...', { id: 'report' });
-      const res = await generateReport(id, graphImage);
-      
-      const url = window.URL.createObjectURL(new Blob([res.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `IIP_Report_Case_${id}.pdf`);
-      document.body.appendChild(link);
-      link.click();
-      link.parentNode.removeChild(link);
-      
-      toast.success('Report generated successfully!', { id: 'report' });
-    } catch (error) {
-      console.error(error);
-      toast.error('Failed to generate PDF report.', { id: 'report' });
-    }
-  };
+    };
+    fetchData();
+  }, [shareToken]);
 
   // Entities Filtering
   const filteredEntities = useMemo(() => {
@@ -177,30 +87,30 @@ const CaseDetails = () => {
 
   if (loading) {
     return (
-      <div className="flex h-full items-center justify-center text-cyber-blue">
-        <div className="animate-pulse flex items-center gap-2"><Activity size={20} /> Accessing Intelligence Matrix...</div>
+      <div className="flex h-screen items-center justify-center bg-cyber-dark text-cyber-blue">
+        <div className="animate-pulse flex items-center gap-2"><Activity size={20} /> Accessing Secure Intelligence Matrix...</div>
       </div>
     );
   }
 
-  if (!caseDetails) {
+  if (error || !caseDetails) {
     return (
-      <div className="p-8 text-cyber-text">
-        <button onClick={() => navigate('/cases')} className="flex items-center gap-2 mb-6 hover:text-cyber-blue transition-colors">
-          <ArrowLeft size={20} /> Back to Dashboard
-        </button>
-        <p className="text-red-400">Case not found.</p>
+      <div className="flex h-screen flex-col items-center justify-center bg-cyber-dark text-cyber-text">
+        <ShieldAlert size={48} className="text-red-500 mb-4" />
+        <h2 className="text-2xl font-bold text-red-500 mb-2">ACCESS DENIED</h2>
+        <p className="text-cyber-textMuted">{error}</p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-full bg-cyber-dark">
+    <div className="flex flex-col h-screen bg-cyber-dark">
+      {/* Banner */}
+      <div className="bg-red-500/20 border-b border-red-500 text-red-400 text-center py-1 text-xs font-bold tracking-widest uppercase">
+        Read-only Shared Investigation
+      </div>
+
       <div className="p-8 border-b border-cyber-accent bg-cyber-darker relative">
-        <button onClick={() => navigate('/cases')} className="flex items-center gap-2 mb-6 text-cyber-textMuted hover:text-cyber-blue transition-colors text-sm w-fit">
-          <ArrowLeft size={16} /> Back to Active Investigations
-        </button>
-        
         <div className="flex justify-between items-start">
           <div>
             <div className="flex items-center gap-3 mb-2">
@@ -216,44 +126,6 @@ const CaseDetails = () => {
               <p className="leading-relaxed">{caseDetails.description}</p>
             </div>
           </div>
-          
-          <div className="flex flex-col items-end gap-3">
-            <button onClick={() => setIsModalOpen(true)} className="btn-primary flex items-center gap-2 w-full justify-center">
-              <Plus size={18} />
-              Add Evidence
-            </button>
-            
-            <button onClick={handleGenerateReport} className="btn-secondary flex items-center gap-2 w-full justify-center">
-              <Download size={18} />
-              Export Report
-            </button>
-          </div>
-        </div>
-
-        {/* Sharing Controls */}
-        <div className="mt-6 flex items-center gap-4 bg-cyber-dark p-3 rounded border border-cyber-accent/50 w-fit">
-          <div className="flex items-center gap-2">
-            <Share2 size={16} className={caseDetails.is_public ? 'text-cyber-blue' : 'text-cyber-textMuted'} />
-            <span className="text-sm font-semibold text-cyber-text">Public Sharing:</span>
-          </div>
-          
-          <button 
-            onClick={handleTogglePublic} 
-            className={`w-12 h-6 rounded-full transition-colors relative flex items-center px-1 ${caseDetails.is_public ? 'bg-cyber-blue' : 'bg-cyber-darker border border-cyber-accent'}`}
-          >
-            <div className={`w-4 h-4 rounded-full bg-white transition-transform ${caseDetails.is_public ? 'translate-x-6' : 'translate-x-0'}`}></div>
-          </button>
-          
-          {caseDetails.is_public && caseDetails.share_token && (
-            <div className="flex items-center gap-2 ml-4">
-              <span className="text-xs font-mono text-cyber-textMuted bg-cyber-darker px-2 py-1 rounded border border-cyber-accent/30 select-all">
-                {window.location.origin}/shared/{caseDetails.share_token.substring(0,8)}...
-              </span>
-              <button onClick={handleCopyLink} className="text-cyber-textMuted hover:text-cyber-blue transition-colors p-1" title="Copy Full Link">
-                <Copy size={16} />
-              </button>
-            </div>
-          )}
         </div>
 
         {/* Tab Navigation */}
@@ -293,9 +165,6 @@ const CaseDetails = () => {
             {evidenceList.length === 0 ? (
               <div className="py-12 flex flex-col items-center justify-center text-cyber-textMuted glass-card">
                 <p className="text-lg mb-4">No evidence collected yet.</p>
-                <button onClick={() => setIsModalOpen(true)} className="btn-secondary">
-                  Initialize Evidence Collection
-                </button>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -303,7 +172,7 @@ const CaseDetails = () => {
                   <EvidenceCard 
                     key={evidence.id} 
                     evidence={evidence} 
-                    onDelete={handleDeleteEvidence} 
+                    onDelete={null} // Read-only
                   />
                 ))}
               </div>
@@ -441,13 +310,8 @@ const CaseDetails = () => {
 
       </div>
 
-      <AddEvidenceModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        onSubmit={handleAddEvidence} 
-      />
     </div>
   );
 };
 
-export default CaseDetails;
+export default SharedCaseView;

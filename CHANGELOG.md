@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.5.0] - Investigation Reports & Case Sharing
+### Added
+- Phase 6 Implementation.
+- Server-side `pdfkit` report generation engine via `POST /api/cases/:id/report`.
+- Frontend DOM-to-Canvas export using `html2canvas` to capture the Intelligence Graph.
+- Public sharing access toggle on cases, provisioning unique `share_token` URLs.
+- Read-only `/shared/:shareToken` dashboard isolating unauthenticated external viewers from internal data mutation endpoints.
+
 ## [v0.4.0] - Relationship Engine & Intelligence Graph
 ### Added
 - Phase 4 Implementation.

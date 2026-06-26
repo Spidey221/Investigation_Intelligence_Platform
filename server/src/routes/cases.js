@@ -10,6 +10,10 @@ router.post('/', casesController.createCase);
 router.put('/:id', casesController.updateCase);
 router.delete('/:id', casesController.deleteCase);
 
+// Phase 6 endpoints
+router.put('/:id/public', casesController.togglePublicAccess);
+router.post('/:id/report', casesController.generateReport);
+
 // Evidence Routes
 router.get('/:id/evidence', evidenceController.getEvidenceByCase);
 router.post('/:id/evidence', (req, res, next) => {

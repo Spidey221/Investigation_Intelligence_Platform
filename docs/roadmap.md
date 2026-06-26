@@ -26,6 +26,6 @@
 - Allow investigators to visualize how a phone number from Case A links to an email from Case B.
 - Interactive nodes for exploring the investigation graph.
 
-## Phase 6: Report Generation (Planned 🚧)
+## Phase 6: Report Generation (Completed ✅)
 - Export full case profiles, evidence timelines, and graph visuals to PDF.
 - Shareable URLs for read-only access.
