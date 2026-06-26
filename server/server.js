@@ -12,8 +12,10 @@ app.use(express.json());
 // Routes
 const casesRoutes = require('./src/routes/cases');
 const evidenceRoutes = require('./src/routes/evidence');
+const entitiesRoutes = require('./src/routes/entities');
 app.use('/api/cases', casesRoutes);
 app.use('/api/evidence', evidenceRoutes);
+app.use('/api', entitiesRoutes);
 
 // Static files
 const path = require('path');

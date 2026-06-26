@@ -56,3 +56,13 @@ Uploads new evidence for a case. Requires `multipart/form-data`.
 
 ### `DELETE /evidence/:id`
 Deletes an evidence record and removes the file from local storage.
+
+---
+
+## Entities
+
+### `GET /cases/:id/entities`
+Retrieves all entities associated with a specific case.
+
+### `GET /evidence/:id/entities`
+Retrieves all entities discovered within a specific piece of evidence.

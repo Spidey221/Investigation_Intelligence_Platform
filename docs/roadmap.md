@@ -10,9 +10,10 @@
 - Support Multer file uploads for images and PDFs.
 - Render chronological timelines with type-specific badges.
 
-## Phase 3: Entity Extraction (In Progress 🚧)
-- Parse text notes and uploaded documents to extract key entities (IP addresses, URLs, email addresses, names).
-- Integrate basic NLP or regex parsing on the backend.
+## Phase 3: Entity Extraction (Completed ✅)
+- Parse text notes and uploaded documents to extract key entities (IP addresses, URLs, emails, phones).
+- Regex-based logic for synchronized intelligence extraction.
+- Entity groups with filtering, search, and copy features in the UI.
 
 ## Phase 4: Relationship Engine (Planned 🚧)
 - Allow users to manually link extracted entities or map evidence to multiple cases.

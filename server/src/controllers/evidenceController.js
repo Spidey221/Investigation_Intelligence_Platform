@@ -2,6 +2,7 @@ const db = require('../db');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const { processAndSaveEntities } = require('../services/entityService');
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -76,7 +77,14 @@ const createEvidence = async (req, res) => {
       RETURNING *
     `;
     const { rows } = await db.query(query, [caseId, title, type, content, filePath, originalFilename]);
-    res.status(201).json(rows[0]);
+    const evidence = rows[0];
+
+    // Trigger synchronous entity extraction
+    if (content) {
+      await processAndSaveEntities(caseId, evidence.id, content);
+    }
+
+    res.status(201).json(evidence);
   } catch (err) {
     console.error('Error creating evidence:', err);
     res.status(500).json({ error: err.message || 'Failed to create evidence' });
