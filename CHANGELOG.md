@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.7.0] - Production Engineering & Infrastructure
+### Added
+- Complete Dockerization of the application stack using `docker-compose`.
+- Multi-stage frontend Docker build utilizing highly performant Nginx serving.
+- GitHub Actions CI pipeline implementing automated tests and build verifications.
+- Robust environment validation failing-fast on missing critical secrets.
+- Comprehensive Test Suites utilizing Jest (Backend) and Vitest (Frontend).
+- Structured application and security logging implemented natively via Winston and Morgan.
+- Extensive documentation rewrites (`deployment.md` and `architecture.md`).
+
 ## [v0.6.0] - Authentication, RBAC, Audit Logging & Integrity
 ### Added
 - Comprehensive JWT-based authentication system utilizing secure `httpOnly` cookies.

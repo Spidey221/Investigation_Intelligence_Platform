@@ -2,6 +2,7 @@ const db = require('../db');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { logAction } = require('../services/auditService');
+const logger = require('../config/logger');
 
 const generateToken = (user) => {
   return jwt.sign(
@@ -50,12 +51,14 @@ const login = async (req, res) => {
     const user = rows[0];
 
     if (!user) {
+      logger.warn(`LOGIN_FAILED: Unknown email ${email} from ${req.ip}`);
       await logAction(null, 'LOGIN_FAILED', 'AUTH', null, `Failed login attempt for email: ${email}`, req.ip);
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
     const isMatch = await bcrypt.compare(password, user.password_hash);
     if (!isMatch) {
+      logger.warn(`LOGIN_FAILED: Incorrect password for ${email} from ${req.ip}`);
       await logAction(null, 'LOGIN_FAILED', 'AUTH', null, `Failed login attempt for email: ${email}`, req.ip);
       return res.status(401).json({ error: 'Invalid credentials' });
     }

@@ -5,6 +5,7 @@ const fs = require('fs');
 const { processAndSaveEntities } = require('../services/entityService');
 const { generateFileHash } = require('../services/hashService');
 const { logAction } = require('../services/auditService');
+const logger = require('../config/logger');
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -161,6 +162,10 @@ const verifyIntegrity = async (req, res) => {
 
     const isValid = currentHash === evidence.file_hash;
     
+    if (!isValid) {
+      logger.warn(`INTEGRITY_FAILURE: Evidence ID ${id} failed hash verification.`);
+    }
+
     if (req.user) {
       await logAction(req.user.id, 'INTEGRITY_VERIFICATION', 'EVIDENCE', id, `Verified integrity. Result: ${isValid ? 'Verified' : 'Compromised'}`, req.ip);
     }

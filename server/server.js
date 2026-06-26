@@ -1,14 +1,17 @@
 const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
-require('dotenv').config();
+const morgan = require('morgan');
+const env = require('./src/config/env');
+const logger = require('./src/config/logger');
 
 const app = express();
-const port = process.env.PORT || 5000;
+const port = env.port;
 
 // Middleware
+app.use(morgan('combined', { stream: { write: message => logger.info(message.trim()) } }));
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  origin: env.clientUrl,
   credentials: true
 }));
 app.use(express.json({ limit: '50mb' }));
@@ -45,5 +48,5 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+  logger.info(`Server is running on port: ${port}`);
 });

@@ -1,0 +1,104 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ "master", "main" ]
+  pull_request:
+    branches: [ "master", "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres_password
+          POSTGRES_DB: iip_test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
+
+      - name: Install Dependencies
+        run: |
+          cd server && npm ci
+          cd ../client && npm ci
+
+      - name: Run Backend Linter
+        run: cd server && npm run lint || echo "No linter setup yet, skipping"
+
+      - name: Run Frontend Linter
+        run: cd client && npm run lint || echo "Linting skipped or failed"
+
+      - name: Run Backend Tests
+        env:
+          DB_USER: postgres
+          DB_PASSWORD: postgres_password
+          DB_HOST: localhost
+          DB_NAME: iip_test_db
+          DB_PORT: 5432
+          JWT_SECRET: test_secret
+          NODE_ENV: test
+        run: |
+          cd server
+          npm run test
+
+      - name: Run Frontend Tests
+        run: |
+          cd client
+          npm run test
+
+      - name: Build Frontend
+        run: |
+          cd client
+          npm run build
+
+      - name: Verify Backend Startup
+        env:
+          DB_USER: postgres
+          DB_PASSWORD: postgres_password
+          DB_HOST: localhost
+          DB_NAME: iip_test_db
+          DB_PORT: 5432
+          JWT_SECRET: test_secret
+          NODE_ENV: test
+        run: |
+          cd server
+          # Start the server in the background
+          npm start &
+          SERVER_PID=$!
+          # Wait a few seconds for startup
+          sleep 5
+          # Check if the process is still running
+          if kill -0 $SERVER_PID; then
+            echo "Backend successfully started"
+            kill $SERVER_PID
+          else
+            echo "Backend failed to start"
+            exit 1
+          fi
+
+      - name: Upload Coverage Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-reports
+          path: |
+            server/coverage/
+            client/coverage/

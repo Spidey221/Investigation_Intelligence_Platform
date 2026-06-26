@@ -1,21 +1,28 @@
-# Architecture Overview
+# System Architecture
 
-## Component Diagram
-```mermaid
-graph TD;
-    Client[React + Vite Frontend] -->|REST API| Server[Node + Express Backend];
-    Server --> Database[(PostgreSQL)];
-    Server -.-> FileSystem[Local Uploads];
-```
+The Investigation Intelligence Platform (IIP) utilizes a modern, decoupled client-server architecture designed for high availability and secure data processing.
 
-## Frontend (Client)
-The frontend is built using React and Vite, utilizing Tailwind CSS for styling.
-- **Pages:** Top-level components mapped to Routes (e.g., `Dashboard.jsx`, `CaseDetails.jsx`).
-- **Components:** Feature-driven modular components (`cases`, `evidence`, `layout`).
-- **API Client:** Axios instance configured in `src/api/axios.js` communicating with the backend.
+## High-Level Components
 
-## Backend (Server)
-The backend is a Node.js + Express.js application handling REST API requests.
-- **Controllers:** `casesController.js` and `evidenceController.js` contain the core business logic.
-- **Routes:** `cases.js` and `evidence.js` define the endpoint mappings.
-- **Storage:** Metadata is stored in PostgreSQL via the `pg` pool. Static files (images, PDFs) are managed by Multer and stored locally in the `uploads/` directory, which is served statically.
+### 1. Frontend Client (React)
+- **Framework:** React 18 / Vite
+- **Routing:** React Router DOM (with Route-based Authorization Guards)
+- **State Management:** React Context API (Auth Context)
+- **Visualizations:** React Flow / Dagre / html2canvas
+- **Styling:** Tailwind CSS v3
+
+### 2. Backend API (Node.js)
+- **Framework:** Express.js
+- **Security:** JWT (JSON Web Tokens) securely stored in HTTP-Only cookies, Bcrypt password hashing.
+- **Role-Based Access Control:** Middleware enforcing `ADMIN`, `INVESTIGATOR`, `ANALYST`, and `VIEWER` constraints.
+- **Reporting:** PDFKit dynamically streaming multi-page intelligence reports to the client.
+- **Logging:** Winston and Morgan capturing structured HTTP streams and specific Security events (`LOGIN_FAILED`, `INTEGRITY_FAILURE`, etc.) into `logs/`.
+
+### 3. Database (PostgreSQL 15)
+- **Schema Structure:** Highly relational schemas mapping users to cases, evidence, extracted entities, relationships, and audit logs.
+- **File Integrity:** Automatically maintains cryptographic SHA-256 hashes of all uploaded binaries (Images, PDFs) to guarantee strict chain of custody.
+
+### 4. Infrastructure & Pipeline
+- **Orchestration:** Docker Compose binds the Nginx Client, Node Backend, and PostgreSQL database into a single, cohesive, production-ready environment.
+- **Testing:** Jest + Supertest (Backend), Vitest + React Testing Library (Frontend).
+- **CI/CD:** GitHub Actions sequentially checks out, tests, builds, and verifies backend health before approving pull requests.
