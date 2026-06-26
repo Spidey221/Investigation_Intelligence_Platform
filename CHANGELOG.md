@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.4.0] - Relationship Engine & Intelligence Graph
+### Added
+- Phase 4 Implementation.
+- `relationships` database table with foreign keys to entities and cases.
+- Automatic backend relationship generation (`ASSOCIATED_WITH`, `BELONGS_TO`, `REPEATED_INDICATOR`, `CO_OCCURS`).
+- Confidence scoring for graph relationships.
+- Interactive Investigation Graph using `@xyflow/react` and `dagre` layout.
+- Graph Sidebar displaying deep metadata for clicked nodes.
+- Tabbed interface in `CaseDetails.jsx` (Evidence, Entities, Relationships, Graph).
+- Endpoints `GET /api/cases/:id/relationships` and `GET /api/cases/:id/graph` containing nodes, edges, and statistics.
+
 ## [v0.3.0] - Automated Entity Extraction
 ### Added
 - Automated `entityExtractor` service relying purely on Regex.

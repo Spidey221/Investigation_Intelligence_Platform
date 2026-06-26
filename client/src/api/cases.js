@@ -16,3 +16,5 @@ export const addEvidence = (caseId, formData) => api.post(`/cases/${caseId}/evid
 export const deleteEvidence = (evidenceId) => api.delete(`/evidence/${evidenceId}`);
 
 export const getEntitiesByCase = (caseId) => api.get(`/cases/${caseId}/entities`);
+export const getRelationshipsByCase = (caseId) => api.get(`/cases/${caseId}/relationships`);
+export const getInvestigationGraph = (caseId) => api.get(`/cases/${caseId}/graph`);

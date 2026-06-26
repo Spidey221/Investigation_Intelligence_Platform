@@ -15,12 +15,15 @@
 - Regex-based logic for synchronized intelligence extraction.
 - Entity groups with filtering, search, and copy features in the UI.
 
-## Phase 4: Relationship Engine (Planned 🚧)
+## Phase 4: Relationship Engine (Completed ✅)
 - Allow users to manually link extracted entities or map evidence to multiple cases.
-- Create relationship taxonomy (e.g., "Owned By", "Communicated With").
+- Automatically generate relationships (`ASSOCIATED_WITH`, `BELONGS_TO`, etc.) upon evidence extraction.
+- Expose `/api/cases/:caseId/graph` to format nodes and edges.
 
-## Phase 5: Intelligence Graph Visualization (Planned 🚧)
-- Integrate D3.js or Cytoscape to visually map the relationships.
+## Phase 5: Intelligence Graph Visualization (Completed ✅)
+- Use a frontend graph library (`@xyflow/react`) to map out entity relationships.
+- Include Dagre graph layout for automatic positioning.
+- Allow investigators to visualize how a phone number from Case A links to an email from Case B.
 - Interactive nodes for exploring the investigation graph.
 
 ## Phase 6: Report Generation (Planned 🚧)

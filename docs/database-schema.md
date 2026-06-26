@@ -35,3 +35,16 @@ The database uses PostgreSQL.
 | `source_text_excerpt` | TEXT | NULL | A small window of text providing context around the extraction |
 | `created_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Extraction date |
 *(Note: Has UNIQUE constraint on `evidence_id`, `entity_type`, `entity_value`)*
+
+## `relationships` Table
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| `id` | SERIAL | PRIMARY KEY | Unique relationship identifier |
+| `case_id` | INTEGER | REFERENCES cases(id) ON DELETE CASCADE | Associated case |
+| `source_entity_id` | INTEGER | REFERENCES entities(id) ON DELETE CASCADE | The origin entity |
+| `target_entity_id` | INTEGER | REFERENCES entities(id) ON DELETE CASCADE | The destination entity |
+| `relationship_type` | VARCHAR(50) | NOT NULL | e.g. ASSOCIATED_WITH, BELONGS_TO, REPEATED_INDICATOR |
+| `source_evidence_id` | INTEGER | REFERENCES evidence(id) ON DELETE CASCADE | The evidence where this was discovered |
+| `confidence_score` | NUMERIC | DEFAULT 1.0 | Strength of connection |
+| `created_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Creation date |
+*(Note: Has UNIQUE constraint on `source_entity_id`, `target_entity_id`, `source_evidence_id`)*

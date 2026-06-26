@@ -66,3 +66,14 @@ Retrieves all entities associated with a specific case.
 
 ### `GET /evidence/:id/entities`
 Retrieves all entities discovered within a specific piece of evidence.
+
+---
+
+## Relationships & Graph
+
+### `GET /cases/:id/relationships`
+Retrieves a table-ready list of all relationships formed in the case.
+
+### `GET /cases/:id/graph`
+Retrieves intelligence relationships formatted exclusively for graph visualization.
+Returns `{ nodes: [...], edges: [...], statistics: {...} }`

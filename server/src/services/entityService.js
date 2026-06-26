@@ -1,5 +1,6 @@
 const db = require('../db');
 const { extractAllEntities } = require('./entityExtractor');
+const { createEvidenceRelationships, generateRelationships } = require('./relationshipService');
 
 /**
  * Normalizes an entity value based on its type.
@@ -65,6 +66,11 @@ const processAndSaveEntities = async (caseId, evidenceId, textContent) => {
     } catch (err) {
       console.error(`Failed to save entity ${normalizedValue}:`, err);
     }
+  }
+
+  if (savedEntities.length > 0) {
+    await createEvidenceRelationships(caseId, evidenceId);
+    await generateRelationships(caseId);
   }
 
   return savedEntities;

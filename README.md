@@ -1,7 +1,7 @@
 # Investigation Intelligence Platform (IIP)
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Version](https://img.shields.io/badge/version-0.3.0-green.svg)
+![Version](https://img.shields.io/badge/version-0.4.0-green.svg)
 ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
 
 ## Overview
@@ -30,8 +30,8 @@ graph TD;
 - **Phase 1: Case Management** ✅
 - **Phase 2: Evidence Management** ✅
 - **Phase 3: Entity Extraction** ✅
-- **Phase 4: Relationship Engine** 🚧
-- **Phase 5: Intelligence Graph Visualization** 🚧
+- **Phase 4: Relationship Engine** ✅
+- **Phase 5: Intelligence Graph Visualization** ✅
 - **Phase 6: Report Generation** 🚧
 
 ## Technology Stack
