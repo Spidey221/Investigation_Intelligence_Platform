@@ -5,3 +5,12 @@ export const getCaseById = (id) => api.get(`/cases/${id}`);
 export const createCase = (data) => api.post('/cases', data);
 export const updateCase = (id, data) => api.put(`/cases/${id}`, data);
 export const deleteCase = (id) => api.delete(`/cases/${id}`);
+
+// Evidence APIs
+export const getEvidence = (caseId) => api.get(`/cases/${caseId}/evidence`);
+export const addEvidence = (caseId, formData) => api.post(`/cases/${caseId}/evidence`, formData, {
+  headers: {
+    'Content-Type': 'multipart/form-data',
+  },
+});
+export const deleteEvidence = (evidenceId) => api.delete(`/evidence/${evidenceId}`);
