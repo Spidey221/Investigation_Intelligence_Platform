@@ -1,6 +1,6 @@
 import React from 'react';
 import { FileText, Image as ImageIcon, Link as LinkIcon, FileCheck, StickyNote, Trash2, Download } from 'lucide-react';
-import api from '../api/axios'; // if we need base url, but actually we can just point to /uploads since vite proxies it.
+import api from '../../api/axios'; // if we need base url, but actually we can just point to /uploads since vite proxies it.
 
 const EvidenceCard = ({ evidence, onDelete }) => {
   const typeConfig = {

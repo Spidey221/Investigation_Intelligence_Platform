@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Plus, FolderOpen, Calendar, AlignLeft } from 'lucide-react';
 import { getCaseById, getEvidence, addEvidence, deleteEvidence } from '../api/cases';
-import AddEvidenceModal from '../components/AddEvidenceModal';
-import EvidenceCard from '../components/EvidenceCard';
+import { AddEvidenceModal, EvidenceCard } from '../components/evidence';
 import { toast } from 'react-hot-toast';
 
 const CaseDetails = () => {

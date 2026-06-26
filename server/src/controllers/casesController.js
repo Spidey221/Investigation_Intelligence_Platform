@@ -1,6 +1,11 @@
 const db = require('../db');
 
-// Get all cases
+/**
+ * Retrieve all cases ordered by creation date descending.
+ * @param {import('express').Request} req - Express request object
+ * @param {import('express').Response} res - Express response object
+ * @returns {Promise<void>}
+ */
 const getCases = async (req, res) => {
   try {
     const { rows } = await db.query('SELECT * FROM cases ORDER BY created_at DESC');
@@ -11,7 +16,12 @@ const getCases = async (req, res) => {
   }
 };
 
-// Get a single case by id
+/**
+ * Retrieve a specific case by its ID.
+ * @param {import('express').Request} req - Express request object
+ * @param {import('express').Response} res - Express response object
+ * @returns {Promise<void>}
+ */
 const getCaseById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -26,7 +36,12 @@ const getCaseById = async (req, res) => {
   }
 };
 
-// Create a new case
+/**
+ * Create a new case in the database.
+ * @param {import('express').Request} req - Express request object containing title, description, status
+ * @param {import('express').Response} res - Express response object
+ * @returns {Promise<void>}
+ */
 const createCase = async (req, res) => {
   try {
     const { title, description, status } = req.body;
@@ -47,7 +62,12 @@ const createCase = async (req, res) => {
   }
 };
 
-// Update an existing case
+/**
+ * Update an existing case by its ID.
+ * @param {import('express').Request} req - Express request object
+ * @param {import('express').Response} res - Express response object
+ * @returns {Promise<void>}
+ */
 const updateCase = async (req, res) => {
   try {
     const { id } = req.params;
@@ -70,7 +90,12 @@ const updateCase = async (req, res) => {
   }
 };
 
-// Delete a case
+/**
+ * Delete a case by its ID.
+ * @param {import('express').Request} req - Express request object
+ * @param {import('express').Response} res - Express response object
+ * @returns {Promise<void>}
+ */
 const deleteCase = async (req, res) => {
   try {
     const { id } = req.params;

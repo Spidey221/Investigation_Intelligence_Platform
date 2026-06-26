@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import Topbar from '../components/Topbar';
-import CaseCard from '../components/CaseCard';
-import CaseModal from '../components/CaseModal';
+import { Topbar } from '../components/layout';
+import { CaseCard, CaseModal } from '../components/cases';
 import { getCases, createCase, updateCase, deleteCase } from '../api/cases';
 import { Loader, AlertTriangle } from 'lucide-react';
 

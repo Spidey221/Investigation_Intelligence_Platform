@@ -31,6 +31,12 @@ const upload = multer({
   fileFilter: fileFilter
 });
 
+/**
+ * Retrieve all evidence for a specific case by case ID.
+ * @param {import('express').Request} req - Express request object
+ * @param {import('express').Response} res - Express response object
+ * @returns {Promise<void>}
+ */
 const getEvidenceByCase = async (req, res) => {
   try {
     const { id } = req.params;
@@ -42,6 +48,12 @@ const getEvidenceByCase = async (req, res) => {
   }
 };
 
+/**
+ * Create a new evidence item with optional file upload handling.
+ * @param {import('express').Request} req - Express request object containing body and optional file
+ * @param {import('express').Response} res - Express response object
+ * @returns {Promise<void>}
+ */
 const createEvidence = async (req, res) => {
   try {
     const caseId = req.params.id;
@@ -71,6 +83,12 @@ const createEvidence = async (req, res) => {
   }
 };
 
+/**
+ * Delete a specific evidence item and remove its associated file from local storage if applicable.
+ * @param {import('express').Request} req - Express request object
+ * @param {import('express').Response} res - Express response object
+ * @returns {Promise<void>}
+ */
 const deleteEvidence = async (req, res) => {
   try {
     const { id } = req.params;
