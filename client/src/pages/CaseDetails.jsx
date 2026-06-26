@@ -5,6 +5,7 @@ import { getCaseById, getEvidence, addEvidence, deleteEvidence, getEntitiesByCas
 import { AddEvidenceModal, EvidenceCard } from '../components/evidence';
 import { EntityGroup } from '../components/entities';
 import InvestigationGraph from '../components/graph/InvestigationGraph';
+import AuditTimeline from '../components/audit/AuditTimeline';
 import { toast } from 'react-hot-toast';
 import html2canvas from 'html2canvas';
 
@@ -228,6 +229,9 @@ const CaseDetails = () => {
               Export Report
             </button>
           </div>
+
+          {/* Audit Timeline */}
+          <AuditTimeline caseId={caseDetails.id} />
         </div>
 
         {/* Sharing Controls */}

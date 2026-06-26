@@ -56,8 +56,14 @@ const createCase = async (req, res) => {
       VALUES ($1, $2, $3) 
       RETURNING *
     `;
-    const { rows } = await db.query(query, [title, description, status]);
-    res.status(201).json(rows[0]);
+    const { rows } = await db.query(query, [title, description || null, req.user ? req.user.id : null]);
+    const newCase = rows[0];
+    
+    if (req.user) {
+      await logAction(req.user.id, 'CASE_CREATED', 'CASE', newCase.id, `Created case: ${title}`, req.ip);
+    }
+    
+    res.status(201).json(newCase);
   } catch (err) {
     console.error('Error creating case:', err);
     res.status(500).json({ error: 'Failed to create case' });
@@ -82,9 +88,12 @@ const updateCase = async (req, res) => {
       RETURNING *
     `;
     const { rows } = await db.query(query, [title, description, status, id]);
-    if (rows.length === 0) {
-      return res.status(404).json({ error: 'Case not found' });
+    if (rows.length === 0) return res.status(404).json({ error: 'Case not found' });
+    
+    if (req.user) {
+      await logAction(req.user.id, 'CASE_UPDATED', 'CASE', id, `Updated case: ${title}`, req.ip);
     }
+    
     res.json(rows[0]);
   } catch (err) {
     console.error('Error updating case:', err);
@@ -104,6 +113,11 @@ const deleteCase = async (req, res) => {
     const query = 'DELETE FROM cases WHERE id = $1 RETURNING *';
     const { rows } = await db.query(query, [id]);
     if (rows.length === 0) return res.status(404).json({ error: 'Case not found' });
+    
+    if (req.user) {
+      await logAction(req.user.id, 'CASE_DELETED', 'CASE', id, `Deleted case: ${rows[0].title}`, req.ip);
+    }
+    
     res.json({ message: 'Case deleted successfully' });
   } catch (err) {
     res.status(500).json({ error: 'Failed to delete case' });
@@ -133,6 +147,12 @@ const togglePublicAccess = async (req, res) => {
       WHERE id = $3 RETURNING *
     `;
     const { rows } = await db.query(query, [is_public, share_token, id]);
+    
+    if (req.user) {
+      const action = is_public ? 'PUBLIC_LINK_CREATED' : 'PUBLIC_LINK_DISABLED';
+      await logAction(req.user.id, action, 'CASE', id, `Public visibility set to ${is_public}`, req.ip);
+    }
+    
     res.json(rows[0]);
   } catch (err) {
     console.error('Error toggling public access:', err);
@@ -149,6 +169,10 @@ const generateReport = async (req, res) => {
     const { graphImage } = req.body;
     
     const pdfBuffer = await generateInvestigationReport(id, graphImage);
+    
+    if (req.user) {
+      await logAction(req.user.id, 'REPORT_GENERATED', 'CASE', id, 'Investigation Report generated', req.ip);
+    }
     
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename=Investigation_Report_Case_${id}.pdf`);

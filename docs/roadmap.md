@@ -29,3 +29,8 @@
 ## Phase 6: Report Generation (Completed ✅)
 - Export full case profiles, evidence timelines, and graph visuals to PDF.
 - Shareable URLs for read-only access.
+
+## Phase 7: Authentication & RBAC (Completed ✅)
+- JWT-based login, secure HTTP-only cookies.
+- Investigator, Analyst, Admin roles.
+- Comprehensive audit logging and File Integrity checks.

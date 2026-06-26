@@ -1,65 +1,77 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { ShieldAlert, LogIn } from 'lucide-react';
+import { AuthContext } from '../context/AuthContext';
+import { Shield, Lock, Mail } from 'lucide-react';
 
 const Login = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const { login } = useContext(AuthContext);
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({ email: '', password: '' });
 
-  const handleLogin = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Frontend only: fake authentication, navigate straight to dashboard
-    navigate('/dashboard');
+    try {
+      await login({ email, password });
+      navigate('/dashboard');
+    } catch (err) {
+      // Error handled by context toast
+    }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-cyber-dark p-4">
-      <div className="w-full max-w-md glass-card p-8 shadow-[0_0_40px_rgba(0,0,0,0.8)] relative overflow-hidden">
-        {/* Decorative background glow */}
-        <div className="absolute top-[-50%] left-[-50%] w-[200%] h-[200%] bg-[radial-gradient(ellipse_at_center,_rgba(0,240,255,0.1)_0%,_transparent_50%)] pointer-events-none"></div>
-        
-        <div className="flex flex-col items-center mb-8 relative z-10">
-          <ShieldAlert size={48} className="text-cyber-blue mb-4 drop-shadow-[0_0_15px_rgba(0,240,255,0.8)]" />
-          <h1 className="text-2xl font-bold text-cyber-text tracking-widest">IIP CORE</h1>
-          <p className="text-cyber-textMuted text-sm mt-2">Authorized Personnel Only</p>
+    <div className="min-h-screen bg-cyber-dark flex items-center justify-center p-4">
+      <div className="w-full max-w-md bg-cyber-card border border-cyber-border rounded-lg p-8">
+        <div className="flex flex-col items-center mb-8">
+          <div className="w-16 h-16 bg-cyber-border rounded-full flex items-center justify-center mb-4">
+            <Shield className="w-8 h-8 text-cyber-blue" />
+          </div>
+          <h1 className="text-2xl font-bold text-cyber-text">Investigative Platform</h1>
+          <p className="text-cyber-muted">Sign in to your account</p>
         </div>
-        
-        <form onSubmit={handleLogin} className="space-y-5 relative z-10">
+
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-cyber-textMuted mb-1">Agent Email</label>
-            <input 
-              type="email" 
-              required
-              className="input-field" 
-              placeholder="agent@iip.gov"
-              value={formData.email}
-              onChange={(e) => setFormData({...formData, email: e.target.value})}
-            />
+            <label className="block text-sm font-medium text-cyber-muted mb-2">Email Address</label>
+            <div className="relative">
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-cyber-muted" />
+              <input
+                type="email"
+                required
+                className="w-full pl-10 pr-4 py-2 bg-cyber-dark border border-cyber-border rounded-lg text-cyber-text focus:outline-none focus:border-cyber-blue focus:ring-1 focus:ring-cyber-blue transition-colors"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="investigator@agency.gov"
+              />
+            </div>
           </div>
-          
+
           <div>
-            <label className="block text-sm font-medium text-cyber-textMuted mb-1">Passcode</label>
-            <input 
-              type="password" 
-              required
-              className="input-field" 
-              placeholder="••••••••"
-              value={formData.password}
-              onChange={(e) => setFormData({...formData, password: e.target.value})}
-            />
+            <label className="block text-sm font-medium text-cyber-muted mb-2">Password</label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-cyber-muted" />
+              <input
+                type="password"
+                required
+                className="w-full pl-10 pr-4 py-2 bg-cyber-dark border border-cyber-border rounded-lg text-cyber-text focus:outline-none focus:border-cyber-blue focus:ring-1 focus:ring-cyber-blue transition-colors"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+              />
+            </div>
           </div>
-          
-          <button type="submit" className="w-full btn-primary py-3 flex items-center justify-center gap-2 mt-4 text-lg">
-            <LogIn size={20} />
-            Authenticate
+
+          <button
+            type="submit"
+            className="w-full bg-cyber-blue hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+          >
+            Sign In
           </button>
         </form>
-        
-        <div className="mt-6 text-center relative z-10">
-          <p className="text-sm text-cyber-textMuted">
-            New operative? <Link to="/register" className="text-cyber-blue hover:underline">Request Access</Link>
-          </p>
-        </div>
+
+        <p className="mt-6 text-center text-cyber-muted">
+          Don't have an account? <Link to="/register" className="text-cyber-blue hover:underline">Register here</Link>
+        </p>
       </div>
     </div>
   );

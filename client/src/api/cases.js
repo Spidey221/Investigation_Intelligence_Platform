@@ -1,4 +1,12 @@
-import api from './axios';
+import axios from 'axios';
+
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  withCredentials: true,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
 
 export const getCases = () => api.get('/cases');
 export const getCaseById = (id) => api.get(`/cases/${id}`);
@@ -6,18 +14,20 @@ export const createCase = (data) => api.post('/cases', data);
 export const updateCase = (id, data) => api.put(`/cases/${id}`, data);
 export const deleteCase = (id) => api.delete(`/cases/${id}`);
 
-// Evidence APIs
-export const getEvidence = (caseId) => api.get(`/cases/${caseId}/evidence`);
-export const addEvidence = (caseId, formData) => api.post(`/cases/${caseId}/evidence`, formData, {
-  headers: {
-    'Content-Type': 'multipart/form-data',
-  },
-});
+export const uploadEvidence = (caseId, formData) => {
+  return api.post(`/cases/${caseId}/evidence`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+};
+
 export const deleteEvidence = (evidenceId) => api.delete(`/evidence/${evidenceId}`);
 
-export const getEntitiesByCase = (caseId) => api.get(`/cases/${caseId}/entities`);
-export const getRelationshipsByCase = (caseId) => api.get(`/cases/${caseId}/relationships`);
-export const getInvestigationGraph = (caseId) => api.get(`/cases/${caseId}/graph`);
+export const getIntelligenceGraph = (caseId) => api.get(`/cases/${caseId}/graph`);
 
-export const togglePublicAccess = (caseId) => api.put(`/cases/${caseId}/public`);
-export const generateReport = (caseId, graphImage) => api.post(`/cases/${caseId}/report`, { graphImage }, { responseType: 'blob' });
+// Phase 6 endpoints
+export const togglePublicAccess = (caseId, isPublic) => api.put(`/cases/${caseId}/public`, { is_public: isPublic });
+export const generateInvestigationReport = (caseId, graphImage) => {
+  return api.post(`/cases/${caseId}/report`, { graphImage }, { responseType: 'blob' });
+};

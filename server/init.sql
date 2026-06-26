@@ -1,3 +1,12 @@
+CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    role VARCHAR(50) DEFAULT 'INVESTIGATOR',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE IF NOT EXISTS cases (
     id SERIAL PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
@@ -6,6 +15,7 @@ CREATE TABLE IF NOT EXISTS cases (
     is_public BOOLEAN DEFAULT false,
     share_token UUID UNIQUE,
     share_created_at TIMESTAMP WITH TIME ZONE,
+    created_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -18,6 +28,8 @@ CREATE TABLE IF NOT EXISTS evidence (
     content TEXT,
     file_path VARCHAR(255),
     original_filename VARCHAR(255),
+    file_hash TEXT,
+    uploaded_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -43,4 +55,15 @@ CREATE TABLE IF NOT EXISTS relationships (
     confidence_score NUMERIC DEFAULT 1.0,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(source_entity_id, target_entity_id, source_evidence_id)
+);
+
+CREATE TABLE IF NOT EXISTS audit_logs (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    action VARCHAR(255) NOT NULL,
+    resource_type VARCHAR(100),
+    resource_id INTEGER,
+    details TEXT,
+    ip_address VARCHAR(100),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );

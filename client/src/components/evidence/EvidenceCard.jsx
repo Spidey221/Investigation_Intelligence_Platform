@@ -1,6 +1,6 @@
-import React from 'react';
-import { FileText, Image as ImageIcon, Link as LinkIcon, FileCheck, StickyNote, Trash2, Download } from 'lucide-react';
-import api from '../../api/axios'; // if we need base url, but actually we can just point to /uploads since vite proxies it.
+import React, { useState, useEffect } from 'react';
+import { FileText, Image as ImageIcon, Link as LinkIcon, FileCheck, StickyNote, Trash2, Download, AlertTriangle, ShieldCheck } from 'lucide-react';
+import { verifyEvidenceIntegrity } from '../../api/audit';
 
 const EvidenceCard = ({ evidence, onDelete }) => {
   const typeConfig = {
@@ -13,6 +13,28 @@ const EvidenceCard = ({ evidence, onDelete }) => {
 
   const config = typeConfig[evidence.type] || typeConfig['Text'];
   const Icon = config.icon;
+
+  const [integrityStatus, setIntegrityStatus] = useState('unknown'); // 'unknown', 'verified', 'compromised'
+  const [verifying, setVerifying] = useState(false);
+
+  useEffect(() => {
+    if (evidence.type === 'Image' || evidence.type === 'PDF') {
+      handleVerify();
+    }
+  }, []);
+
+  const handleVerify = async () => {
+    try {
+      setVerifying(true);
+      const res = await verifyEvidenceIntegrity(evidence.id);
+      if (res.data.valid === true) setIntegrityStatus('verified');
+      else if (res.data.valid === false) setIntegrityStatus('compromised');
+    } catch (err) {
+      console.error('Integrity check failed', err);
+    } finally {
+      setVerifying(false);
+    }
+  };
 
   const renderContent = () => {
     switch(evidence.type) {
@@ -80,6 +102,19 @@ const EvidenceCard = ({ evidence, onDelete }) => {
           <span className="text-xs text-cyber-textMuted">
             {new Date(evidence.created_at).toLocaleString()}
           </span>
+          {(evidence.type === 'Image' || evidence.type === 'PDF') && (
+            <div className="mt-1 flex items-center gap-2 text-xs">
+              {verifying ? (
+                <span className="text-cyber-textMuted">Verifying integrity...</span>
+              ) : integrityStatus === 'verified' ? (
+                <span className="text-green-400 flex items-center gap-1"><ShieldCheck size={12} /> Verified</span>
+              ) : integrityStatus === 'compromised' ? (
+                <span className="text-red-400 flex items-center gap-1"><AlertTriangle size={12} /> Compromised</span>
+              ) : (
+                <button onClick={handleVerify} className="text-cyber-blue hover:underline">Verify Integrity</button>
+              )}
+            </div>
+          )}
         </div>
       </div>
       

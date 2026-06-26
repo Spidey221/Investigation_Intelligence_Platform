@@ -2,6 +2,22 @@
 
 Base URL: `/api`
 
+## Authentication (`/api/auth`)
+
+### `POST /register`
+Creates a new user. Expects `{ name, email, password }`.
+
+### `POST /login`
+Authenticates a user. Expects `{ email, password }`. Sets HTTP-only cookie.
+
+### `POST /logout`
+Clears authentication cookie.
+
+### `GET /profile`
+Retrieves details of the authenticated user.
+
+---
+
 ## Cases
 
 ### `GET /cases`
@@ -57,6 +73,10 @@ Uploads new evidence for a case. Requires `multipart/form-data`.
 ### `DELETE /evidence/:id`
 Deletes an evidence record and removes the file from local storage.
 
+### `POST /evidence/:id/verify`
+Recomputes the hash of the target evidence file and compares it to the database `file_hash` to ensure data integrity.
+Returns `{ valid: true/false }`
+
 ---
 
 ## Entities
@@ -96,3 +116,10 @@ Retrieves case metadata for a shared case (requires `is_public` = true).
 ### `GET /shared/cases/:shareToken/relationships`
 ### `GET /shared/cases/:shareToken/graph`
 Read-only endpoints specifically for populating the external Shared Dashboard without exposing actual case IDs.
+
+---
+
+## Audit Logs (`/api/audit`)
+
+### `GET /case/:caseId`
+Retrieves a chronological sequence of all logged actions associated with the specified case.

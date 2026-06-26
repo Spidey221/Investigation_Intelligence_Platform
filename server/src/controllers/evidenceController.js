@@ -3,6 +3,8 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const { processAndSaveEntities } = require('../services/entityService');
+const { generateFileHash } = require('../services/hashService');
+const { logAction } = require('../services/auditService');
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -61,10 +63,13 @@ const createEvidence = async (req, res) => {
     const { title, type, content } = req.body;
     let filePath = null;
     let originalFilename = null;
+    let fileHash = null;
 
     if (req.file) {
-      filePath = req.file.filename;
+      filePath = path.join('uploads', req.file.filename);
       originalFilename = req.file.originalname;
+      // Generate SHA-256 hash
+      fileHash = await generateFileHash(req.file.path);
     }
 
     if (!title || !type) {
@@ -72,19 +77,26 @@ const createEvidence = async (req, res) => {
     }
 
     const query = `
-      INSERT INTO evidence (case_id, title, type, content, file_path, original_filename) 
-      VALUES ($1, $2, $3, $4, $5, $6) 
+      INSERT INTO evidence (case_id, title, type, content, file_path, original_filename, file_hash, uploaded_by) 
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
       RETURNING *
     `;
-    const { rows } = await db.query(query, [caseId, title, type, content, filePath, originalFilename]);
-    const evidence = rows[0];
+    const values = [caseId, title, type, content || null, filePath, originalFilename, fileHash, req.user ? req.user.id : null];
+
+    const { rows } = await db.query(query, values);
+    const savedEvidence = rows[0];
+
+    // Log the upload
+    if (req.user) {
+      await logAction(req.user.id, 'EVIDENCE_UPLOADED', 'EVIDENCE', savedEvidence.id, `Uploaded ${type}: ${title}`, req.ip);
+    }
 
     // Trigger synchronous entity extraction
     if (content) {
-      await processAndSaveEntities(caseId, evidence.id, content);
+      await processAndSaveEntities(caseId, savedEvidence.id, content);
     }
 
-    res.status(201).json(evidence);
+    res.status(201).json(savedEvidence);
   } catch (err) {
     console.error('Error creating evidence:', err);
     res.status(500).json({ error: err.message || 'Failed to create evidence' });
@@ -108,8 +120,13 @@ const deleteEvidence = async (req, res) => {
     
     const evidence = rows[0];
     
+    // Log deletion
+    if (req.user) {
+      await logAction(req.user.id, 'EVIDENCE_DELETED', 'EVIDENCE', id, `Deleted evidence: ${evidence.title}`, req.ip);
+    }
+
     if (evidence.file_path) {
-      const fullPath = path.join(__dirname, '../../uploads', evidence.file_path);
+      const fullPath = path.join(__dirname, '../../', evidence.file_path);
       if (fs.existsSync(fullPath)) {
         fs.unlinkSync(fullPath);
       }
@@ -123,9 +140,42 @@ const deleteEvidence = async (req, res) => {
   }
 };
 
+/**
+ * Verify integrity of an evidence file via hash comparison.
+ */
+const verifyIntegrity = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { rows } = await db.query('SELECT file_path, file_hash FROM evidence WHERE id = $1', [id]);
+    
+    if (rows.length === 0) return res.status(404).json({ error: 'Evidence not found' });
+    const evidence = rows[0];
+
+    if (!evidence.file_path || !evidence.file_hash) {
+      return res.json({ valid: null, message: 'No file or hash found for this evidence' });
+    }
+
+    // Ensure the path is absolute or resolved properly from the root
+    const absolutePath = path.resolve(__dirname, '../../', evidence.file_path);
+    const currentHash = await generateFileHash(absolutePath);
+
+    const isValid = currentHash === evidence.file_hash;
+    
+    if (req.user) {
+      await logAction(req.user.id, 'INTEGRITY_VERIFICATION', 'EVIDENCE', id, `Verified integrity. Result: ${isValid ? 'Verified' : 'Compromised'}`, req.ip);
+    }
+
+    res.json({ valid: isValid });
+  } catch (err) {
+    console.error('Integrity verification failed:', err);
+    res.status(500).json({ error: 'Integrity check failed' });
+  }
+};
+
 module.exports = {
   upload,
   getEvidenceByCase,
   createEvidence,
-  deleteEvidence
+  deleteEvidence,
+  verifyIntegrity
 };

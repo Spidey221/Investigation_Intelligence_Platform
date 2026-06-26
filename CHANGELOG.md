@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.6.0] - Authentication, RBAC, Audit Logging & Integrity
+### Added
+- Comprehensive JWT-based authentication system utilizing secure `httpOnly` cookies.
+- Robust Role-Based Access Control (RBAC) supporting `ADMIN`, `INVESTIGATOR`, `ANALYST`, and `VIEWER` roles.
+- `auditService.js` to chronologically track all major CRUD operations across the system.
+- Integration of `crypto` hash generation mapping SHA-256 hashes for all uploaded evidence files.
+- Dedicated `POST /api/evidence/:id/verify` endpoint dynamically recomputing hashes to guarantee file integrity.
+- New frontend authentication views (`Login.jsx`, `Register.jsx`, `Profile.jsx`, `Unauthorized.jsx`).
+- Embeddable `AuditTimeline.jsx` giving a complete timeline inside `CaseDetails.jsx`.
+
 ## [v0.5.0] - Investigation Reports & Case Sharing
 ### Added
 - Phase 6 Implementation.
