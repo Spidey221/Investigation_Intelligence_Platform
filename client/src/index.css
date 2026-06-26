@@ -1,0 +1,45 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-cyber-dark text-cyber-text font-sans antialiased;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-cyber-blue text-cyber-darker px-4 py-2 rounded-md font-medium transition-all hover:bg-cyber-blueHover hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] active:scale-95 disabled:opacity-50;
+  }
+  .btn-secondary {
+    @apply bg-cyber-accent text-cyber-text px-4 py-2 rounded-md font-medium transition-all hover:bg-gray-700 active:scale-95 disabled:opacity-50;
+  }
+  .btn-danger {
+    @apply bg-red-600 text-white px-4 py-2 rounded-md font-medium transition-all hover:bg-red-500 hover:shadow-[0_0_15px_rgba(220,38,38,0.5)] active:scale-95 disabled:opacity-50;
+  }
+  .input-field {
+    @apply w-full bg-cyber-dark border border-gray-700 rounded-md px-3 py-2 text-cyber-text focus:outline-none focus:border-cyber-blue focus:ring-1 focus:ring-cyber-blue transition-all;
+  }
+  .glass-card {
+    @apply bg-cyber-card bg-opacity-80 backdrop-blur-md border border-cyber-accent rounded-lg;
+  }
+}
+
+/* Custom Scrollbar for dark theme */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0a0f; 
+}
+::-webkit-scrollbar-thumb {
+  background: #2a2a35; 
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3f3f4e; 
+}
